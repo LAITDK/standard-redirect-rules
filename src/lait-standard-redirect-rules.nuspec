@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>LAIT.StandardRedirectRules</id>
+    <version>1.0.0</version>
+    <title>LAIT Standard Redirect Rules</title>
+    <authors>Nick Frederiksen</authors>
+    <owners>LAIT ApS</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Package for common Redirect rules.
+Meant for Umbraco sites, but can be used on any site with Rewrite Module for IIS.
+Features that makes is package great.
+• No 301 chaining. You only redirect once, no matter how many things are wrong with the URL.
+• Topdomains are enforced with prefixed www.
+• Subdomains are enforced with no prefix of www.
+• Whitelist of urls that are not meant to be transformed. This is meant for API's, Ajax calls or backend framework such as Umbraco.
+
+Known issues:
+• Domains with additional punctuation marks won't work as expected, unless as a subdomain.
+• Domains such as mysite.co.uk won't work as expected because of the additional punctuation mark is counted as a subdomain.</description>
+    <summary>Package for common Redirect rules, making a solid url structure on your site.</summary>
+    <releaseNotes></releaseNotes>
+  </metadata>
+</package>

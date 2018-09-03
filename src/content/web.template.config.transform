@@ -1,0 +1,97 @@
+<configuration>
+	<system.webServer>
+		<rewrite>
+			<rules>
+				<rule name="WhiteList" stopProcessing="true">
+					<match url="(.*)" />
+					<conditions logicalGrouping="MatchAny" trackAllCaptures="false">
+						<add input="{URL}" pattern="^.*/(base|webshop|umbraco|umbraco_client|client|install|api|\.well-known)/" ignoreCase="true"/>
+						<add input="{HTTP_HOST}" pattern=".*localhost.*" ignoreCase="true" />
+					</conditions>
+					<action type="None" />
+				</rule>
+				<rule name="SEO - Remove trailing slash" stopProcessing="false">
+					<match url="^_*(.*)/+$" />
+					<conditions>
+						<add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+						<add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+					</conditions>
+					<action type="Rewrite" url="_{R:1}" />
+				</rule>
+				<rule name="SEO - ToLower" stopProcessing="false">
+					<match url="^_*(.*)" ignoreCase="false" />
+					<conditions logicalGrouping="MatchAll" trackAllCaptures="false">
+						<add input="{R:1}" pattern="[A-Z]" ignoreCase="false" />
+						<add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+						<add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+						<add input="{R:1}" pattern="^.*?\.(axd|css|js|jpg|jpeg|png|gif|ashx|asmx|svc).*?$" negate="true" ignoreCase="true" />
+					</conditions>
+					<action type="Rewrite" url="_{ToLower:{R:1}}" />
+				</rule>
+				<rule name="SEO - remove default.aspx" stopProcessing="false">
+					<match url="^_*(.*?)/?default\.aspx$" />
+					<action type="Rewrite" url="_{R:1}" />
+				</rule>
+				<rule name="SEO - Trim aspx" stopProcessing="false">
+					<match url="^_*(.*)\.aspx$" />
+					<action type="Rewrite" url="_{R:1}" />
+				</rule>
+
+				<rule name="Redirect - Subdomains with www to non-www" stopProcessing="false">
+					<match url="^_*(.*)" />
+					<conditions logicalGrouping="MatchAll" trackAllCaptures="false">
+						<add input="{HTTP_HOST}" pattern="^www\.(.*)\.([^\.]+)\.([^\.]+?)$" />
+					</conditions>
+					<action type="Redirect" url="_{C:1}.{C:2}.{C:3}/{R:1}" redirectType="Permanent" />
+				</rule>
+				<rule name="Redirect - Top domains with non-www to www" stopProcessing="false">
+					<match url="^_*(.*)" />
+					<conditions logicalGrouping="MatchAll" trackAllCaptures="false">
+						<add input="{HTTP_HOST}" pattern="^([^\.]+)\.([^\.]+?)$" />
+					</conditions>
+					<action type="Redirect" url="_www.{HTTP_HOST}/{R:1}" redirectType="Permanent" />
+				</rule>
+				<!-- Set "enabled" to "true" when using HTTPS -->
+				<rule name="HTTP to HTTPS redirect" stopProcessing="false" enabled="false">
+					<match url="(.*)" />
+					<conditions>
+						<add input="{HTTPS}" pattern="off" ignoreCase="true" />
+					</conditions>
+					<action type="Redirect" url="_{HTTP_HOST}/{R:1}" redirectType="Permanent" />
+				</rule>
+				<rule name="Redirect - Non-canonical redirect" stopProcessing="true">
+					<match url="^_+(.*)" />
+					<action type="Redirect" url="{MapSSL:OFF}{R:1}" redirectType="Permanent"/>
+				</rule>
+			</rules>
+			<rewriteMaps>
+				<!-- Set "defaultValue" to "ON", when using HTTPS -->
+				<rewriteMap name="MapSSL" defaultValue="OFF">
+					<add key="ON" value="https://" />
+					<add key="OFF" value="http://" />
+				</rewriteMap>
+			</rewriteMaps>
+			<outboundRules>
+				<rule name="RewriteCache-Control" preCondition="old url with 301">
+					<match serverVariable="RESPONSE_Cache-Control" pattern="(.*)" />
+					<conditions>
+					</conditions>
+					<action type="Rewrite" value="NO-CACHE" />
+				</rule>
+				<rule name="Add Strict-Transport-Security when HTTPS" enabled="true">
+					<match serverVariable="RESPONSE_Strict_Transport_Security" pattern=".*" />
+					<conditions>
+						<add input="{HTTPS}" pattern="on" ignoreCase="true" />
+					</conditions>
+					<action type="Rewrite" value="max-age=31536000" />
+				</rule>
+				<preConditions>
+					<preCondition name="old url with 301">
+						<add input="{RESPONSE_CONTENT_TYPE}" pattern="^text/html" />
+						<add input="{RESPONSE_STATUS}" pattern="^301$" />
+					</preCondition>
+				</preConditions>
+			</outboundRules>
+		</rewrite>
+	</system.webServer>
+</configuration>
